@@ -1,11 +1,16 @@
 import express from "express";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import jwt from "jsonwebtoken"; 
 import {z} from "zod"; 
 import bcrypt from "bcrypt";
-import { UserModel }  from "./db.js";
+import { contentModel, UserModel }  from "./db.js";
+import { userMiddleware } from "./middleware.js";
+
+
+const jwtSecretKey = "heyheyhey";
 
 const app = express();
+
 app.use(express.json());
 
 app.post("/api/v1/signup", async(req,res)=>{
@@ -52,7 +57,7 @@ app.post("/api/v1/signin",async(req,res)=>{
             if(!passwordMatch){
                 return res.status(401).json({error: "Invalid username or password"});
             } else {
-                const token = jwt.sign({userId: user._id}, "your_jwt_secret");
+                const token = jwt.sign({userId: user._id}, jwtSecretKey);
                 res.json({token});
             }
         }
@@ -67,8 +72,35 @@ app.post("/api/v1/signin",async(req,res)=>{
     }
 })
 
-app.post("/api/v1/content",(req,res)=>{
+app.post("/api/v1/content", userMiddleware, async (req, res) => {
+    try {
+        const { link, title, type, tags } = req.body;
+        
+        // Ensure userId exists (middleware should guarantee this)
+        if (!req.userId) {
+            return res.status(401).json({ 
+                message: "Unauthorized - userId not found" 
+            });
+        }
 
+        const content = await contentModel.create({
+            title,
+            link,
+            type,
+            tags,
+            userId: new Types.ObjectId(req.userId) // Convert string to ObjectId
+        });
+
+        res.status(201).json({
+            message: "Content created successfully",
+            contentId: content._id
+        });
+    } catch (error) {
+        console.error("Error creating content:", error);
+        res.status(500).json({ 
+            message: "Failed to create content" 
+        });
+    }
 })
 
 app.get("/api/v1/content",(req,res)=>{
