@@ -19,6 +19,7 @@ const ConetentSchema = new Schema({
     type: { type: String, enum: contentTypes, required: true },
     tags: [{ type: mongoose.Types.ObjectId, ref: 'Tag' }],
     userId: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
+    // authorId: { type: mongoose.Types.ObjectId, ref: 'User', required: true },
 })
 
-export const contentModel = model("content", ConetentSchema);
+export const contentModel = model("content", ConetentSchema);   

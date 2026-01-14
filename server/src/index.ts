@@ -103,12 +103,22 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
     }
 })
 
-app.get("/api/v1/content",(req,res)=>{
+app.get("/api/v1/content", userMiddleware ,async (req,res)=>{
+    // @ts-ignore
+    const userId = req.userId;
+    const contents = await contentModel.find({ userId:new Types.ObjectId(userId)}).populate("userId","username");
+    res.json({contents});
 
 })
 
-app.delete("/api/v1/content",(req,res)=>{
+app.delete("/api/v1/content",userMiddleware, async (req,res)=>{
+    const contentId = req.body.contentId;
 
+    await contentModel.deleteMany({ 
+        contentId,
+        userId : new Types.ObjectId(req.userId)
+     });
+     res.json({message: "Content deleted successfully"});
 })
 
 app.post("/api/v1/brain/share",(req,res)=>{
