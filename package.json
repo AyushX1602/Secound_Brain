@@ -1,5 +1,14 @@
 {
   "dependencies": {
-    "@types/express": "^5.0.6"
+    "@types/express": "^5.0.6",
+    "dotenv": "^17.2.3"
+  },
+  "scripts": {
+    "dev": "tsx watch server/src/index.ts",
+    "start": "node server/dist/index.js",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
   }
 }

@@ -3,9 +3,9 @@ import mongoose, { Types } from "mongoose";
 import jwt from "jsonwebtoken"; 
 import {z} from "zod"; 
 import bcrypt from "bcrypt";
-import { contentModel, UserModel }  from "./db.js";
+import { contentModel, UserModel,LinksModel }  from "./db.js";
 import { userMiddleware } from "./middleware.js";
-
+import { random } from "./utils.js";
 
 const jwtSecretKey = "heyheyhey";
 
@@ -81,7 +81,7 @@ app.post("/api/v1/content", userMiddleware, async (req, res) => {
             return res.status(401).json({ 
                 message: "Unauthorized - userId not found" 
             });
-        }
+        }   
 
         const content = await contentModel.create({
             title,
@@ -121,14 +121,66 @@ app.delete("/api/v1/content",userMiddleware, async (req,res)=>{
      res.json({message: "Content deleted successfully"});
 })
 
-app.post("/api/v1/brain/share",(req,res)=>{
-
+app.post("/api/v1/brain/share",userMiddleware, async (req,res)=>{
+    const share = req.body.share;
+    if(share){
+        // Check if link already exists
+        const existingLink = await LinksModel.findOne({userId: new Types.ObjectId(req.userId)});
+        if(existingLink){
+            return res.json({
+                message: "Share link already exists",
+                hash: existingLink.hash
+            });
+        }
+        
+        // Create new link
+        const newLink = await LinksModel.create({
+            userId: new Types.ObjectId(req.userId),
+            hash: random(10)
+        })
+        
+        res.json({
+            message: "Share link created",
+            hash: newLink.hash
+        });
+    }else {
+        await LinksModel.deleteOne({userId: new Types.ObjectId(req.userId)});
+        res.json({message: "Share link deleted"});
+    }
 })
 
-app.get("/api/v1/brain/:sharelink",(req,res)=>{
-
+app.get("/api/v1/brain/:sharelink",async(req,res)=>{
+    try {
+        const hash = req.params.sharelink;
+        const link = await LinksModel.findOne({hash});
+        if(!link){
+            return res.status(404).json({message: "Share link not found"});
+        }
+        const content = await contentModel.find({
+            userId: link.userId
+        })
+        
+        const user = await UserModel.findById(link.userId);
+        
+        if (!user) {
+            return res.status(404).json({message: "User not found"});
+        }
+        
+        res.json({content, username: user.username});
+    } catch (error) {
+        console.error("Error fetching shared content:", error);
+        res.status(500).json({message: "Internal server error"});
+    }
 })
 
-app.listen(3000,()=>{
-    console.log("Server started on port 3000");
-})
+// Wait for MongoDB connection before starting server
+mongoose.connection.once('open', () => {
+    console.log('Connected to MongoDB');
+    app.listen(3000, () => {
+        console.log("Server started on port 3000");
+    });
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('MongoDB connection error:', err);
+});
