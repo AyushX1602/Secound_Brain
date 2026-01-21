@@ -6,11 +6,11 @@ import bcrypt from "bcrypt";
 import { contentModel, UserModel,LinksModel }  from "./db.js";
 import { userMiddleware } from "./middleware.js";
 import { random } from "./utils.js";
+import cors from "cors";
 
 const jwtSecretKey = "heyheyhey";
-
 const app = express();
-
+app.use(cors());
 app.use(express.json());
 
 app.post("/api/v1/signup", async(req,res)=>{
