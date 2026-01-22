@@ -1,9 +1,9 @@
-export function Input({placeholder,ref}:{placeholder:string,ref:any}) {
+export function Input({placeholder,ref,type}:{placeholder:string,ref:any,type?:string}) {
     return <div>
         <input 
             ref={ref} 
             placeholder={placeholder} 
-            type={"text"} 
+            type={type || "text"} 
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
         />
     </div>

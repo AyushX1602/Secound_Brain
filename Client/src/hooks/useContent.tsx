@@ -6,7 +6,7 @@ interface Content {
     id: string;
     title: string;
     link: string;
-    type: "twitter" | "youtube" | "article";
+    type: "tweet" | "video" | "article";
 }
 
 export function useContent() {

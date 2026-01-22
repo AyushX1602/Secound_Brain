@@ -4,8 +4,13 @@ import { Button } from "./button";
 import { Input } from "./input";
 import axios from "axios";
 import { BackendURL } from "../config";
-import hooks from "hooks";
-export function CreateContentModal({open,onClose}) {
+
+interface CreateContentModalProps {
+    open: boolean;
+    onClose: () => void;
+}
+
+export function CreateContentModal({open, onClose}: CreateContentModalProps) {
 
 enum contentType{
     video="video",
