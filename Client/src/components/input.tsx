@@ -2,7 +2,7 @@ import { RefObject } from "react";
 
 interface InputProps {
     placeholder: string;
-    ref: RefObject<HTMLInputElement>;
+    ref: RefObject<HTMLInputElement | null>;
     type?: string;
 }
 
