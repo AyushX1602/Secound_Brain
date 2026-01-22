@@ -193,12 +193,16 @@ app.get("/api/v1/brain/:sharelink",async(req,res)=>{
 })
 
 // Wait for MongoDB connection before starting server
-mongoose.connection.once('open', () => {
-    console.log('Connected to MongoDB');
-    app.listen(3000, () => {
-        console.log("Server started on port 3000");
-    });
+mongoose.connection.once("open", () => {
+  console.log("Connected to MongoDB");
+
+  const PORT = process.env.PORT || 3000;
+
+  app.listen(PORT, () => {
+    console.log(`Server started on port ${PORT}`);
+  });
 });
+
 
 mongoose.connection.on('error', (err) => {
     console.error('MongoDB connection error:', err);
